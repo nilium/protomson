@@ -1,0 +1,11 @@
+protomson
+---------
+
+This is a dumb, bad, awful protobuf plugin for generating MSON, a dumb,
+bad, awful format, from protobuf files so it can be copied into API
+blueprint files and other stuff.
+
+        $ go get go.spiff.io/protomson/cmd/protoc-gen-mson
+
+You shouldn't use this.
+
