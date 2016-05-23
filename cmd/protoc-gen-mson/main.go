@@ -606,7 +606,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		outfile.Content = proto.String(buf.String())
+		outfile.Content = proto.String(strings.TrimSpace(buf.String()) + "\n\n")
 
 		resp.File = append(resp.File, outfile)
 	}

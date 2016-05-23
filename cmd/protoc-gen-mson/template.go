@@ -13,7 +13,7 @@ import (
 )
 
 const txMessageTemplate = `{{- $ctx := . -}}
-{{ range .Messages.ByScope -}}
+{{- range .Messages.ByScope -}}
 {{- if .ToGenerate -}}
 {{- if .IsMessage }}
 {{ with $msg := . -}}
@@ -25,18 +25,31 @@ const txMessageTemplate = `{{- $ctx := . -}}
 {{- end -}}
 {{- range $i, $field := .Proto.GetField }}
 + {{ $field.GetName }} (
-	{{- with $ctx.Find $msg $field.GetTypeName -}}
-		{{ .Scope }}
-	{{- else -}}
-		{{ $ctx.TypeNameOf $field }}
-	{{- end -}}
-	, optional)
-	{{- with $fmsg := index $ctx.Messages.ByMessage $field -}}
-		{{- with $coms := join "\n    " $fmsg.LeadingComments $fmsg.TrailingComments -}}
-			{{/*space*/}} -
+    {{- if isrepeat $field -}}
+        array
+    {{- else -}}
+        {{- with $ctx.Find $msg $field.GetTypeName -}}
+            {{ .Scope }}
+        {{- else -}}
+            {{ $ctx.TypeNameOf $field }}
+        {{- end -}}
+    {{- end -}}
+    , {{ if isrequired $field }}required{{ else }}optional{{ end }})
+    {{- with $fmsg := index $ctx.Messages.ByMessage $field -}}
+        {{- with $coms := join "\n    " $fmsg.LeadingComments $fmsg.TrailingComments -}}
+            {{/*space*/}} -
     {{ $coms }}
-		{{- end }}
-	{{- end }}
+
+        {{- end }}
+    {{- end -}}
+{{ if isrepeat $field }}
+    - (
+    {{- with $ctx.Find $msg $field.GetTypeName -}}
+        {{- .Scope -}}
+    {{- else -}}
+        {{- $ctx.TypeNameOf $field -}}
+    {{- end -}})
+{{- end -}}
 {{- end }}
 {{ end -}}
 {{- else if .IsEnum }}
@@ -65,6 +78,12 @@ var txFuncs = template.FuncMap{
 		return strings.Join(s, sep)
 	},
 	"Q": func() string { return "`" },
+	"isrequired": func(f *dsc.FieldDescriptorProto) bool {
+		return f.GetLabel() == dsc.FieldDescriptorProto_LABEL_REQUIRED
+	},
+	"isrepeat": func(f *dsc.FieldDescriptorProto) bool {
+		return f.GetLabel() == dsc.FieldDescriptorProto_LABEL_REPEATED
+	},
 }
 
 var txMessage = template.Must(template.New("message").Funcs(txFuncs).Parse(txMessageTemplate))
