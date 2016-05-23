@@ -26,9 +26,9 @@ const txMessageTemplate = `{{- $ctx := . -}}
 {{- range $i, $field := .Proto.GetField }}
 + {{ $field.GetName }} (
 	{{- with $ctx.Find $msg $field.GetTypeName -}}
-		scoped:{{ .Scope }}
+		{{ .Scope }}
 	{{- else -}}
-		typenameof:{{ $ctx.TypeNameOf $field }}
+		{{ $ctx.TypeNameOf $field }}
 	{{- end -}}
 	, optional)
 	{{- with $fmsg := index $ctx.Messages.ByMessage $field -}}
