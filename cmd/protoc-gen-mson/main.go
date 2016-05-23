@@ -549,7 +549,7 @@ func readmsg(dst proto.Message, r io.Reader) error {
 }
 
 func main() {
-	log.SetPrefix("protoc-gen-apibmson: ")
+	log.SetPrefix("protoc-gen-mson: ")
 	log.SetFlags(0)
 
 	req := new(plg.CodeGeneratorRequest)
@@ -570,7 +570,7 @@ func main() {
 		}
 
 		outfile := &plg.CodeGeneratorResponse_File{
-			Name: proto.String(strings.TrimSuffix(filepath.Base(fi.GetName()), ".proto") + ".pb.apib"),
+			Name: proto.String(strings.TrimSuffix(filepath.Base(fi.GetName()), ".proto") + ".pb.mson"),
 		}
 
 		messages := GetMessages(true, fi)
