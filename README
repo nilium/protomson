@@ -3,9 +3,81 @@ protomson
 
 This is a dumb, bad, awful protobuf plugin for generating MSON, a dumb,
 bad, awful format, from protobuf files so it can be copied into API
-blueprint files and other stuff.
+blueprint files and other stuff. This is intended for use with Apiary,
+in particular, but may result in valid MSON that Apiary is incapable of
+parsing due to issues (at the time of this writing) in their API
+blueprint parser. You've been warned.
 
-        $ go get go.spiff.io/protomson/cmd/protoc-gen-mson
+        go get go.spiff.io/protomson/cmd/protoc-gen-mson
 
-You shouldn't use this.
+You shouldn't use this, but you also shouldn't use MSON in general.
+Those involved in its creation are truly warped.
 
+
+Installation
+------------
+
+Run the `go get` command above.
+
+
+Usage
+-----
+
+protomson is used the same as any other protoc plugin when specifying
+the output format:
+
+        protoc --mson_out=. *.proto
+
+This will output files with the suffix .pb.mson. The resulting files'
+contents may be used as data structures in a full API blueprint format.
+
+The plugin is written with the expectation that users are targetting
+syntax="proto3". So, for example, given the following proto3 message:
+
+        // Chunk is used to pass a raw set of bytes and identifying name
+        // to a remote API.
+        message Chunk {
+                // name contains a simple name identifying the Chunk.
+                string name = 1;
+                Type type = 2; // type is the type of the blob.
+                // blob is the raw bytes held by the Chunk.
+                bytes blob = 3;
+
+                enum Type {
+                        DATA     = 0;
+                        CHECKSUM = 1;
+                        SPIDER   = 2;
+                }
+        }
+
+protomson will output the following MSON:
+
+        ## Chunk (object)
+        Chunk is used to pass a raw set of bytes and identifying name
+        to a remote API.
+
+        ### Properties
+        + name (string, optional) -
+            name contains a simple name identifying the Chunk.
+        + type (Chunk.Type, optional) -
+            type is the type of the blob.
+        + blob (string, optional) -
+            blob is the raw bytes held by the Chunk.
+
+        ## Chunk.Type (enum)
+        # Members
+        + `DATA`
+        + `CHECKSUM`
+        + `SPIDER`
+
+
+Optionally, if a message's trailing comment contains only the word
+"private" (ignoring whitespace), that message will be excluded from
+output.  This is finnicky and will likely be removed.
+
+
+License
+-------
+
+protomson is licensed under a 2-clause BSD license. It can be found in
+LICENSE, which should have accompanied this README.
